@@ -1,7 +1,10 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, DateTime, func
 from core.models.base import Base
-from typing import List
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from core.models.user_segment import UserSegment
 
 class Segment(Base):
     __tablename__ = "segments"
