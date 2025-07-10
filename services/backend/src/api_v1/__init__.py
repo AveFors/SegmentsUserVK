@@ -2,10 +2,11 @@ from fastapi import APIRouter
 
 from .user.views import router as user_router
 from .segment.views import router as segment_router
-
+from .user_segment.views import router as user_segment_router
 
 router = APIRouter(prefix="/v1")
 
 
 router.include_router(user_router, prefix='/users')
 router.include_router(segment_router, prefix='/segments')
+router.include_router(user_segment_router, prefix="/user-segments")

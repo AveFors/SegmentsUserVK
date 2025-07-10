@@ -1,6 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, Result, func
+
+from core.models import UserSegment
 from core.models.user import User
 from api_v1.user.schemas import UserCreateSchema, UserSchema, UserBaseSchema, UserUpdateSchema
 
@@ -60,3 +62,18 @@ async def update_user(user_in: UserUpdateSchema, session: AsyncSession, user: Us
     await session.refresh(user)
 
     return UserSchema.model_validate(user)
+
+
+
+async def get_users_by_segment(session: AsyncSession, segment_id: int) -> list[UserSchema]:
+    stmt = (
+        select(User)
+        .join(UserSegment, User.id == UserSegment.user_id)
+        .where(UserSegment.segment_id == segment_id)
+    )
+    result = await session.execute(stmt)
+    users = result.scalars().all()
+
+    user_schemas = [UserSchema.model_validate(user) for user in users]
+
+    return user_schemas

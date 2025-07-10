@@ -58,3 +58,11 @@ async def delete_existing_segment(
 ):
     await crud.delete_segment(segment_id, session)
     return None
+
+
+@router.get("/users/{user_id}/segments", response_model=list[SegmentSchema])
+async def get_segments_by_user(
+    user_id: int, session: AsyncSession = Depends(db_helper.session_getter)
+):
+    segments = await crud.get_segments_by_user(session, user_id)
+    return segments

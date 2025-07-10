@@ -53,3 +53,12 @@ async def delete_user(
 ):
     await crud.delete_user(session, user)
     return None
+
+
+@router.get("/segments/{segment_id}/users", response_model=list[UserSchema])
+async def get_users_by_segment(
+    segment_id: int,
+    session: AsyncSession = Depends(db_helper.session_getter)
+):
+    users = await crud.get_users_by_segment(session, segment_id)
+    return users

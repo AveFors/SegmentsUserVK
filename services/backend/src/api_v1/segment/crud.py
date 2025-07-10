@@ -1,6 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+
+from core.models import UserSegment
 from core.models.segment import Segment
 from api_v1.segment.schemas import SegmentCreateSchema, SegmentUpdateSchema, SegmentSchema
 
@@ -44,3 +46,17 @@ async def delete_segment(segment_id: int, session: AsyncSession):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Segment not found")
     await session.delete(segment)
     await session.commit()
+
+
+async def get_segments_by_user(session: AsyncSession, user_id: int) -> list[SegmentSchema]:
+    stmt = (
+        select(Segment)
+        .join(UserSegment, Segment.id == UserSegment.segment_id)
+        .where(UserSegment.user_id == user_id)
+    )
+    result = await session.execute(stmt)
+    segments = result.scalars().all()
+
+    segment_schemas = [SegmentSchema.model_validate(segment) for segment in segments]
+
+    return segment_schemas
