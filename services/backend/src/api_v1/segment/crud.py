@@ -1,8 +1,11 @@
+import math
+from datetime import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
-from core.models import UserSegment
+from core.models import UserSegment, User
 from core.models.segment import Segment
 from api_v1.segment.schemas import SegmentCreateSchema, SegmentUpdateSchema, SegmentSchema
 
@@ -63,12 +66,7 @@ async def get_segments_by_user(session: AsyncSession, user_id: int) -> list[Segm
 
 
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.models.user import User
-from core.models.user_segment import UserSegment
-from datetime import datetime
-import math
+
 
 async def assign_segment_to_percent(session: AsyncSession, segment_id: int, percent: float) -> list[int]:
     if not (0 < percent <= 100):
