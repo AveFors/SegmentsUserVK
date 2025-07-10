@@ -4,9 +4,10 @@ from core.models import db_helper, Segment
 from api_v1.segment.schemas import (
     SegmentCreateSchema,
     SegmentSchema,
-    SegmentUpdateSchema,
+    SegmentUpdateSchema, SegmentDistributionRequest, SegmentDistributionResponse,
 )
 from api_v1.segment import crud
+from .crud import assign_segment_to_percent
 from .dependencies import get_segment_by_id
 
 router = APIRouter(tags=["Segments"])
@@ -66,3 +67,24 @@ async def get_segments_by_user(
 ):
     segments = await crud.get_segments_by_user(session, user_id)
     return segments
+
+
+@router.post("/{segment_id}/distribute", response_model=SegmentDistributionResponse)
+async def distribute_segment(
+    segment_id: int,
+    data: SegmentDistributionRequest,
+    session: AsyncSession = Depends(db_helper.session_getter),
+):
+    try:
+        assigned_user_ids = await assign_segment_to_percent(
+            session=session,
+            segment_id=segment_id,
+            percent=data.percent,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    return SegmentDistributionResponse(
+        assigned_user_ids=assigned_user_ids,
+        count=len(assigned_user_ids),
+    )

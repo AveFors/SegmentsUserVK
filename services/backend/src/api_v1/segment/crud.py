@@ -60,3 +60,41 @@ async def get_segments_by_user(session: AsyncSession, user_id: int) -> list[Segm
     segment_schemas = [SegmentSchema.model_validate(segment) for segment in segments]
 
     return segment_schemas
+
+
+
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from core.models.user import User
+from core.models.user_segment import UserSegment
+from datetime import datetime
+import math
+
+async def assign_segment_to_percent(session: AsyncSession, segment_id: int, percent: float) -> list[int]:
+    if not (0 < percent <= 100):
+        raise ValueError("Percent must be between 0 and 100")
+
+    subq = select(UserSegment.user_id).where(UserSegment.segment_id == segment_id)
+    stmt = (
+        select(User)
+        .where(User.id.not_in(subq))
+        .order_by(func.random())
+    )
+
+    result = await session.execute(stmt)
+    users = result.scalars().all()
+
+    total = math.ceil(len(users) * (percent / 100))
+    selected_users = users[:total]
+
+    now = datetime.utcnow()
+
+    new_links = [
+        UserSegment(user_id=u.id, segment_id=segment_id, added_at=now)
+        for u in selected_users
+    ]
+
+    session.add_all(new_links)
+    await session.commit()
+
+    return [u.id for u in selected_users]

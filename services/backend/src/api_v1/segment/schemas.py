@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SegmentBaseSchema(BaseModel):
@@ -21,3 +21,12 @@ class SegmentSchema(SegmentBaseSchema):
     created_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SegmentDistributionRequest(BaseModel):
+    percent: float = Field(..., gt=0, le=100, example=30.0)
+
+
+class SegmentDistributionResponse(BaseModel):
+    assigned_user_ids: list[int]
+    count: int
