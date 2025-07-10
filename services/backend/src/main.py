@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from core.models.db_helper import db_helper
 from core.models.base import Base
 
+from api_v1 import router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,6 +17,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(router, prefix='/api')
 
 
 if __name__ == "__main__":

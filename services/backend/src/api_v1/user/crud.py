@@ -37,9 +37,7 @@ async def user_create(session: AsyncSession, user_in: UserCreateSchema) -> User:
     return user
 
 
-async def delete_user(session: AsyncSession, user_id: int) -> None:
-    user = await get_user(user_id, session)
-
+async def delete_user(session: AsyncSession, user: User) -> None:
     if user:
         await session.delete(user)
         await session.commit()
