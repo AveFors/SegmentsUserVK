@@ -20,6 +20,10 @@ async def get_all_users(session: AsyncSession = Depends(db_helper.session_getter
 async def get_user(
     user: User = Depends(get_user_by_id),
 ):
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
     return user
 
 
